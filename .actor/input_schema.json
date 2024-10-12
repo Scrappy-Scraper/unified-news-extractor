@@ -1,0 +1,21 @@
+{
+    "title": "News Extractor",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "urls": {
+            "title": "New Article URLs",
+            "type": "array",
+            "description": "URLs to news articles",
+            "editor": "requestListSources",
+            "prefill": [
+            ]
+        },
+        "useApifyProxy": {
+            "title": "Use Apify Proxy",
+            "type": "boolean",
+            "description": "Use Apify Proxy to fetch articles",
+            "default": true
+        }
+    }
+}
