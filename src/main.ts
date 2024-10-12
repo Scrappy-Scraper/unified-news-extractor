@@ -2,7 +2,7 @@
 import { Actor } from 'apify';
 import {PuppeteerCrawler, Request} from 'crawlee';
 import { router } from './routes.js';
-import {ProxyConfigurationOptions} from "apify/proxy_configuration.js";
+import {ProxyConfigurationOptions} from "apify/proxy_configuration";
 
 await Actor.init();
 interface Input {

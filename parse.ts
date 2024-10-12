@@ -1,4 +1,4 @@
-import parsers from './parsers';
+import parsers from './parsers/index.js';
 import ParseResult from "./types/ParseResult.js";
 import _Parser from "./parsers/_Parser.js";
 import {ContextData} from "./types/ContextData.js";
@@ -18,7 +18,7 @@ export default async function parse(context: ContextData): Promise<ParseResult> 
 
 
     let $ = await parseWithCheerio();
-    let images = $("img").map((ind, img) => {
+    let images = $("img").map((_ind, img) => {
         return {
             url: $(img).attr("src")?? "",
         };
@@ -40,18 +40,18 @@ function simplifyElements($: CheerioAPI): CheerioAPI {
     $("html").find("svg").remove();
     $("html").find("form").remove();
     $("html").find("input").remove();
-    $("html").find("*").get().forEach((element) => {
-        element.attributes.forEach((attribute) => {
+    $("html").find("*").get().forEach((element: Element) => {
+        element.attributes.forEach((attribute: Attribute) => {
             let attributeName = attribute.name;
             if(!(element.tagName == "img" && attributeName == "src")) {
                 $(element).removeAttr(attribute.name)
             }
         })
     });
-    $("html").get().forEach((element) => {element.attributes.forEach((attribute) => {$(element).removeAttr(attribute.name)})});
+    $("html").get().forEach((element: Element) => {element.attributes.forEach((attribute: Attribute) => {$(element).removeAttr(attribute.name)})});
 
     // remove html comments
-    $('*').contents().each(function(ind, node) {
+    $('*').contents().each(function(_: number, node: Element) {
         if(node.nodeType === 8) { // comment node: Node.COMMENT_NODE
             $(node).remove();
         }
@@ -62,7 +62,7 @@ function simplifyElements($: CheerioAPI): CheerioAPI {
     let attemptCount = 0;
     while (shouldCheckForEmpty && attemptCount < 10) {
         let hasChanged = false;
-        $("html").find("*").get().forEach((element) => {
+        $("html").find("*").get().forEach((element: Element) => {
             cleanWhiteSpaces($, element);
             if(
                 element.tagName != "img" &&
@@ -92,7 +92,7 @@ function simplifyElements($: CheerioAPI): CheerioAPI {
     attemptCount = 0;
     while (shouldCheckForShallow && attemptCount < 10) {
         let hasChanged = false;
-        $("html").find("*").get().forEach((element) => {
+        $("html").find("*").get().forEach((element: Element) => {
             if(["span", "div", "p", "a"].indexOf(element.tagName) == -1) return; // only strip "span", "div", "p", and "a
             let children = element.children;
             if(children.length != 1 || children[0].nodeType != 3) return; // current node should have exactly one child, and the child should be a text node
@@ -112,8 +112,14 @@ function simplifyElements($: CheerioAPI): CheerioAPI {
 }
 
 function cleanWhiteSpaces($: CheerioAPI, element: Element) {
-    $(element).contents().filter(
-        function() { return (this.nodeType == 3 && !/\S/.test(this.nodeValue)); })
-        .remove();
-    return this;
+    $(element).contents().filter((index: number, node: Element) => {
+        return node.nodeType === 3
+    })
+}
+
+interface Attribute {
+    name: string;
+    value: string;
+    namespace?: string;
+    prefix?: string;
 }
