@@ -3,7 +3,7 @@
     "type": "object",
     "schemaVersion": 1,
     "properties": {
-        "urls": {
+        "links": {
             "title": "New Article URLs",
             "type": "array",
             "description": "URLs to news articles",
