@@ -1,14 +1,12 @@
 import _Parser from "./_Parser.js";
-import {ContextData} from "../types/ContextData.js";
-import ParseResult from "../types/ParseResult.js";
 
 export default class ABCNews extends _Parser {
-    public sampleUrls = articleUrls;
-    public isAcceptedWebsite(url: string): boolean {
+    sampleUrls = articleUrls;
+    isAcceptedWebsite(url) {
         return url.startsWith('https://abcnews.go.com/');
     }
 
-    public async parse(context: ContextData): Promise<ParseResult> {
+    async parse(context) {
         let {request, page, enqueueLinks, log, pushData, parseWithCheerio} = context;
 
         const pageTitle = await page.title();
