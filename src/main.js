@@ -1,15 +1,14 @@
 // For more information, see https://crawlee.dev/
-import {Actor, ProxyConfiguration} from 'apify';
-import {PuppeteerCrawler, Request} from 'crawlee';
+import {Actor} from 'apify';
+import {PuppeteerCrawler} from 'crawlee';
 import { router } from './routes.js';
-// import {ProxyConfigurationOptions} from "apify/proxy_configuration.js";
 
 await Actor.init();
-let input = await Actor.getInput() ?? { links: ["https://example.com"], useApifyProxy: false  };
-// const proxyConfiguration: ProxyConfiguration | undefined = await Actor.createProxyConfiguration({useApifyProxy: input.useApifyProxy });
+let input = Object.assign({ links: [], useApifyProxy: true  }, (await Actor.getInput() ?? {}));
+const proxyConfiguration = await Actor.createProxyConfiguration({useApifyProxy: input.useApifyProxy });
 
 const crawler = new PuppeteerCrawler({
-    // proxyConfiguration,
+    proxyConfiguration,
     requestHandler: router,
 
     headless: false,
