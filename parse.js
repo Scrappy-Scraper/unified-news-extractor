@@ -11,7 +11,6 @@ export default async function parse(context) {
         }
     }
 
-
     let $ = await parseWithCheerio();
     let images = $("img").map((_ind, img) => {
         return {
@@ -56,25 +55,23 @@ function simplifyElements($) {
     let shouldCheckForEmpty = true;
     let attemptCount = 0;
     while (shouldCheckForEmpty && attemptCount < 10) {
+        let removalCount = 0;
         let hasChanged = false;
         $("html").find("*").get().forEach((element) => {
-            cleanWhiteSpaces($, element);
-            if(
-                element.tagName != "img" &&
-                (
-                    (
-                        $(element).children().get().length === 0 &&
-                        $(element).text().replace(/(\r\n|\n|\r)/gm, "").trim() === ""
-                    ) ||
-                    (
-                        $(element).is(":empty")
-                    )
-                )
-            ) {
+            removeBlankTextNodes($, element);
+            element.children.forEach((child) => {
+                if(child.nodeType === 3) {
+                    let currentText = child.nodeValue;
+                    let cleanedText = cleanText(currentText);
+                    if(cleanedText != currentText) {
+                        child.nodeValue = cleanedText;
+                        hasChanged = true;
+                    }
+                }
+            })
+            if(element.tagName != "img" && $(element).is(":empty")) {
                 $(element).remove();
-                hasChanged = true;
-            } else if(element.children.length == 1 && element.children[0].nodeType == 3) {
-                $(element).text($(element).text().replace(/(\r\n|\n|\r)/gm, " ").replace(/\s\s+/g, ' ').trim());
+                removalCount++;
                 hasChanged = true;
             }
         });
@@ -93,7 +90,7 @@ function simplifyElements($) {
             if(children.length != 1 || children[0].nodeType != 3) return; // current node should have exactly one child, and the child should be a text node
             if((element.parent?.children ?? []).length > 1) return; // the parent should have only one child, which is the current node
             let child = children[0];
-            let text = $(child).text().replace(/(\r\n|\n|\r)/gm, " ").replace(/\s\s+/g, ' ').trim();
+            let text = cleanText($(child).text());
             let parent = element.parent;
             $(element).remove();
             $(parent).text(text);
@@ -106,8 +103,12 @@ function simplifyElements($) {
     return $;
 }
 
-function cleanWhiteSpaces($, element) {
+function removeBlankTextNodes($, element) {
     $(element).contents().filter((index, node) => {
-        return node.nodeType === 3
-    })
+        return node.nodeType === 3 && !/\S/.test(node.nodeValue.replace(/(\r\n|\n|\r|\u00a0)/gm, " "))
+    }).remove();
+}
+
+function cleanText(text) {
+    return text.replace(/(\r\n|\n|\r|\u00a0)/gm, " ").replace(/\s\s+/g, ' ').trim()
 }
