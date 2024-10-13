@@ -19,7 +19,7 @@ type ParseResult =
 {
     success: false,
     url: string,
-    errorCode: "parseFailed"|"unsupported",
+    errorCode: "parseFailed"|"noSupportedParser",
     errorMessage: string,
     html: string,
     images: {

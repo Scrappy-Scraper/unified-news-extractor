@@ -11,13 +11,3 @@ router.addDefaultHandler(async (data) => {
     // Save results as JSON to ./storage/datasets/default
     await data.pushData(parseResult);
 });
-
-router.addHandler('detail', async ({ request, page, log }) => {
-    const title = await page.title();
-    log.info(`${title}`, { url: request.loadedUrl });
-
-    await Dataset.pushData({
-        url: request.loadedUrl,
-        title,
-    });
-});

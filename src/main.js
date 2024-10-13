@@ -19,7 +19,6 @@ const crawler = new PuppeteerCrawler({
 });
 
 await crawler.run(input.links);
-
 await Actor.exit();
 
 // 'https://www.reuters.com/technology/us-propose-how-google-should-boost-online-search-competition-2024-10-08/',
