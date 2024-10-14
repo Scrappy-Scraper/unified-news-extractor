@@ -7,14 +7,15 @@ export default class ABCNews extends _Parser {
     isAcceptedWebsite(url) {
         return url.startsWith('https://abcnews.go.com/');
     }
+    getCrawlerTag(url) { return "cheerio" }
 
     async parse(context) {
         let {request, page, enqueueLinks, log, pushData, parseWithCheerio} = context;
 
-        const pageTitle = await page.title();
         const url = request.loadedUrl;
 
         let $ = await parseWithCheerio('[data-testid="prism-GridColumn"]');
+        let pageTitle = $('title').get()[0]?.text ?? "";
         let articleTitle = $('[data-testid="prism-headline"]').children("h1").text();
         let paragraphs = $('[data-testid^="prism-article-body"]').children("p").map((index, element) => $(element).text()).get();
         paragraphs = paragraphs.map(cleanBlankCharacters).filter(p => p!= "");
@@ -26,8 +27,9 @@ export default class ABCNews extends _Parser {
             };
         })
 
-        if(paragraphs.length == 0) return { success: false, url, errorCode: "parseFailed", errorMessage: "No paragraphs found", html: simplifyElements($), images};
-        return { success: true, type: "article", pageTitle, url, articleTitle, paragraphs, images }
+        let html = simplifyElements($).html();
+        if(paragraphs.length == 0) return { success: false, url, errorCode: "parseFailed", errorMessage: "No paragraphs found", html, images};
+        return { success: true, type: "article", pageTitle, url, articleTitle, paragraphs, images, html }
     }
 }
 

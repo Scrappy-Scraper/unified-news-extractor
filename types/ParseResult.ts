@@ -6,6 +6,7 @@ type ParseResult =
     url: string,
     articleTitle: string,
     paragraphs: string[],
+    html: string,
     images: {
         url: string,
     }[],

@@ -10,7 +10,10 @@ export function simplifyElements($) {
     $("html").find("*").get().forEach((element) => {
         element.attributes.forEach((attribute) => {
             let attributeName = attribute.name;
-            if (!(element.tagName == "img" && attributeName == "src")) {
+            if (
+                !(element.tagName == "img" && attributeName == "src") &&
+                !(element.tagName == "a" && attributeName == "href")
+            ) {
                 $(element).removeAttr(attribute.name)
             }
         })

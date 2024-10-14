@@ -5,4 +5,6 @@ export default abstract class _Parser {
     public abstract isAcceptedWebsite(url: string): boolean;
     public abstract parse(data: ContextData): Promise<ParseResult>;
     public abstract sampleUrls: string[];
+    public getCrawlerTag(url: string) { return "puppeteer.browser" }
 }
+

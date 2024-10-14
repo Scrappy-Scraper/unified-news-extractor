@@ -15,7 +15,7 @@
             "title": "Use Apify Proxy",
             "type": "boolean",
             "description": "Use Apify Proxy to fetch articles",
-            "prefill": true
+            "default": true
         }
     }
 }
