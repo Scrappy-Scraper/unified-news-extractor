@@ -1,5 +1,4 @@
 import _Parser from "./_Parser.js";
-import {cleanBlankCharacters} from "../cleanBlankCharacters.js";
 import {simplifyElements} from "../simplifyElements.js";
 
 export default class fallback extends _Parser {

@@ -1,5 +1,5 @@
 import _Parser from "./_Parser.js";
-import {cleanBlankCharacters} from "../cleanBlankCharacters.js";
+import {cleanBlankCharacters} from "../cleanBlankCharacters.ts";
 import {simplifyElements} from "../simplifyElements.js";
 
 export default class ABCNews extends _Parser {

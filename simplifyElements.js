@@ -1,4 +1,4 @@
-import {cleanBlankCharacters} from "./cleanBlankCharacters.js";
+import {cleanBlankCharacters} from "./cleanBlankCharacters.ts";
 
 export function simplifyElements($) {
     $("html").find("iframe").remove();
