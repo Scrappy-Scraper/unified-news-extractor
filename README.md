@@ -1,9 +1,8 @@
-# Getting started with Crawlee
+# Unified News Extractor
+Parse any news article. This project is to be run as an actor on apify.com
 
-This example uses `PlaywrightCrawler` to recursively crawl https://crawlee.dev using the browser automation library [Playwright](https://playwright.dev).
+## This is a work in progress
+Currently, support just ABCNews and Reuters
 
-You can find more examples and documentation at the following links:
-
-- [Step-by-step tutorial](https://crawlee.dev/docs/introduction) for Crawlee
-- `PlaywrightCrawler` [API documentation](https://crawlee.dev/api/playwright-crawler/class/PlaywrightCrawler)
-- Other [examples](https://crawlee.dev/docs/examples/playwright-crawler)
+## Run locally
+`apify run -p --input '{"useApifyProxy": true, "links":[{"url":"https://abcnews.go.com/Technology/wireStory/northern-lights-dazzle-farther-south-normal-show-114724380"}]}'`

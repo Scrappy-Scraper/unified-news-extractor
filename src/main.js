@@ -1,7 +1,7 @@
 import {Actor} from 'apify';
 import {PuppeteerCrawler, PlaywrightCrawler, CheerioCrawler} from 'crawlee';
 import { router } from './routes.js';
-import {findParser} from "../parsers/index.js";
+import {findParser, fallbackParser} from "../parsers/index.js";
 
 await Actor.init();
 let input = Object.assign({
@@ -11,10 +11,11 @@ let input = Object.assign({
 }, (await Actor.getInput() ?? {}));
 const proxyConfiguration = await Actor.createProxyConfiguration({useApifyProxy: input.useApifyProxy });
 
+const defaultCrawlerTag = fallbackParser.getCrawlerTag("");
 let urlToCrawlerTags = input.links.map(link => {
     let url = link.url;
     let parser = findParser(url);
-    let crawlerTag = "puppeteer.browser";
+    let crawlerTag = defaultCrawlerTag;
     if(parser != null) crawlerTag = parser.getCrawlerTag(url);
     return {url, crawlerTag }
 })
