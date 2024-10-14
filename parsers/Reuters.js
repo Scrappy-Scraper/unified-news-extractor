@@ -15,7 +15,8 @@ export default class Reuters extends _Parser {
         const url = request.loadedUrl;
 
         let $ = await parseWithCheerio('[data-testid="Article"]');
-        let pageTitle = $('title').get()[0]?.text ?? "";
+        let titleDom = $('title').get()[0] ?? null;
+        let pageTitle = (titleDom != null) ? cleanBlankCharacters($(titleDom).text()) : "";
         let articleTitle = $('h1[data-testid="Heading"]').text();
         let paragraphs = $('div[data-testid^="paragraph-"]').map((index, element) => $(element).text()).get();
         paragraphs = paragraphs.map(cleanBlankCharacters).filter(p => p!= "");

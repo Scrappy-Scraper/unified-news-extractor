@@ -15,7 +15,8 @@ export default class ABCNews extends _Parser {
         const url = request.loadedUrl;
 
         let $ = await parseWithCheerio('[data-testid="prism-GridColumn"]');
-        let pageTitle = $('title').get()[0]?.text ?? "";
+        let titleDom = $('title').get()[0] ?? null;
+        let pageTitle = (titleDom != null) ? cleanBlankCharacters($(titleDom).text()) : "";
         let articleTitle = $('[data-testid="prism-headline"]').children("h1").text();
         let paragraphs = $('[data-testid^="prism-article-body"]').children("p").map((index, element) => $(element).text()).get();
         paragraphs = paragraphs.map(cleanBlankCharacters).filter(p => p!= "");
