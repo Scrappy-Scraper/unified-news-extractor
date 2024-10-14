@@ -5,7 +5,6 @@ import cleanBlankCharacters from "../cleanBlankCharacters.js";
 export default class fallback extends _Parser {
     sampleUrls = [];
     isAcceptedWebsite(url) {return true}
-    getCrawlerTag(url) { return "puppeteer.browser" }
 
     async parse(context) {
         let {request, page, enqueueLinks, log, pushData, parseWithCheerio} = context;
