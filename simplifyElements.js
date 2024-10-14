@@ -10,9 +10,10 @@ export function simplifyElements($) {
     $("html").find("*").get().forEach((element) => {
         element.attributes.forEach((attribute) => {
             let attributeName = attribute.name;
+
             if (
-                !(element.tagName == "img" && attributeName == "src") &&
-                !(element.tagName == "a" && attributeName == "href")
+                !(element.tagName == "img" && attributeName == "src" && !attribute.value.startsWith("data:image")) && // not image src that does not start with "data:image"
+                !(element.tagName == "a" && attributeName == "href") // not anchor href
             ) {
                 $(element).removeAttr(attribute.name)
             }
