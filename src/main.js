@@ -1,15 +1,25 @@
 import {Actor} from 'apify';
-import {PuppeteerCrawler, PlaywrightCrawler, CheerioCrawler} from 'crawlee';
-import { router } from './routes.js';
+import {PuppeteerCrawler, PlaywrightCrawler, CheerioCrawler, createBasicRouter} from 'crawlee';
+const router = createBasicRouter();
 import {findParser, fallbackParser} from "../parsers/index.js";
+import parse from "../parse.js";
 
 await Actor.init();
 let input = Object.assign({
     links: [],
     useApifyProxy: true,
     aiAPIKey: null,
+    callbackUrl: "",
 }, (await Actor.getInput() ?? {}));
 const proxyConfiguration = await Actor.createProxyConfiguration({useApifyProxy: input.useApifyProxy });
+router.addDefaultHandler(async (context) => {
+    // await scrollPageToBottom(data.page, {size: 1000, delay: 1000})
+    let parseResult = await parse(context);
+
+    let callbackUrl = input.callbackUrl;
+    if(callbackUrl!= "") await doCallback(callbackUrl, parseResult);
+    await context.pushData(parseResult);
+});
 
 const defaultCrawlerTag = fallbackParser.getCrawlerTag("");
 let urlToCrawlerTags = input.links.map(link => {
@@ -86,6 +96,16 @@ function makeCrawler(crawlerTag) {
         default:
             throw new Error(`Unsupported crawler tag: ${crawlerTag}`);
     }
+}
+
+async function doCallback(url, data) {
+    // Send data to callback URL
+    console.log(`Sending data to callback URL: ${url}`);
+    await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    })
 }
 
 // 'https://www.reuters.com/technology/us-propose-how-google-should-boost-online-search-competition-2024-10-08/',

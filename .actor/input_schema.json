@@ -16,6 +16,13 @@
             "type": "boolean",
             "description": "Use Apify Proxy to fetch articles",
             "default": true
+        },
+        "callbackUrl": {
+            "title": "Callback URL",
+            "type": "string",
+            "description": "When an article is extracted, send a POST request to this URL",
+            "editor": "textfield",
+            "default": ""
         }
     }
 }
