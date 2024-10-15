@@ -1,12 +1,9 @@
-import Chat from "../service/OpenAI/Chat";
-import {TextContentBlock} from "openai/src/resources/beta/threads/messages";
-
-export default async function parseNewsArticleHTMLByOpenAI(html: string, chat: Chat): Promise<{isValidArticle: boolean, title: string, body: string, images: {url: string}[]}> {
+export default async function parseNewsArticleHTMLByOpenAI(html, chat) {
     let validationPrompt = `Below is an HTML of a news article that was got from a news website. The HTML content may or may not actually contain news article. Does the HTML contain news article?. Return either true or false as string and nothing else and no quotation signs.\n\n ${html}`;
     chat.setAssistantModel("gpt-4o-mini");
     await chat.addUserMessage(validationPrompt);
     let validationMessage = await chat.submit();
-    let validationMessageContent: TextContentBlock|null = ((validationMessage?.content ?? []).find(content => content.type === "text") as TextContentBlock ?? null);
+    let validationMessageContent = ((validationMessage?.content ?? []).find((content) => content.type === "text")  ?? null);
     let validationResult = (validationMessageContent?.text.value) ?? null;
     let isValidArticle = (validationResult ?? "false").toLowerCase().indexOf("true") >= 0;
     if (!isValidArticle) return failedResponse;
@@ -15,7 +12,7 @@ export default async function parseNewsArticleHTMLByOpenAI(html: string, chat: C
     await chat.addUserMessage(requestPrompt);
     let extractionMessage = await chat.submit();
     if(extractionMessage == null) return failedResponse;
-    let extractionMessageContent: TextContentBlock|null = ((extractionMessage?.content ?? []).find(content => content.type === "text") as TextContentBlock ?? null);
+    let extractionMessageContent = ((extractionMessage?.content ?? []).find((content) => content.type === "text"));
     let extractionResult = (extractionMessageContent?.text.value) ?? "{}";
     let resultStart = extractionResult.indexOf("{");
     let resultEnd = extractionResult.lastIndexOf("}") + 1;
@@ -32,11 +29,11 @@ export default async function parseNewsArticleHTMLByOpenAI(html: string, chat: C
     await chat.addUserMessage(imageRequestPrompt);
     let imageMessage = await chat.submit();
     if(imageMessage == null) return failedResponse;
-    let imageMessageContent: TextContentBlock|null = ((imageMessage?.content?? []).find(content => content.type === "text") as TextContentBlock ?? null);
+    let imageMessageContent = ((imageMessage?.content?? []).find((content) => content.type === "text"));
     let imageResult = (imageMessageContent?.text.value) ?? "[]";
     let imageResultStart = imageResult.indexOf("[");
     let imageResultEnd = imageResult.lastIndexOf("]") + 1;
-    let images: any[] = [];
+    let images = [];
     if(imageResultStart == -1 || imageResultEnd == -1 || (imageResultEnd - 1) <= imageResultStart) {
         images = [];
     } else {
