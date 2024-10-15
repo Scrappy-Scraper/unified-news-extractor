@@ -23,6 +23,21 @@
             "description": "When an article is extracted, send a POST request to this URL",
             "editor": "textfield",
             "default": ""
+        },
+        "openAIAPIKey": {
+            "title": "Open AI API Key",
+            "type": "string",
+            "description": "Include your OpenAI API key to be able to parse any articles not natively supported by this actor",
+            "editor": "textfield",
+            "default": ""
+        },
+        "openAIParse": {
+            "title": "Parse with OpenAI",
+            "type": "boolean",
+            "description": "If this actor encounters an unsupported website, it can use OpenAI to parse the article",
+            "editor": "checkbox",
+            "default": true,
+            "prefill": true
         }
     }
 }

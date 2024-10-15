@@ -3,22 +3,35 @@ import {PuppeteerCrawler, PlaywrightCrawler, CheerioCrawler, createBasicRouter} 
 const router = createBasicRouter();
 import {findParser, fallbackParser} from "../parsers/index.js";
 import parse from "../parse.js";
+import Chat from "../service/OpenAI/Chat.js";
+import {setDefaultClient} from "../service/OpenAI/getClient.js";
+import parseNewsArticleHTMLByOpenAI from "../helpers/parseNewsArticleHTMLByOpenAI.js";
 
 await Actor.init();
 let input = Object.assign({
     links: [],
     useApifyProxy: true,
-    aiAPIKey: null,
+    openAIAPIKey: null,
+    openAIParse: true,
     callbackUrl: "",
 }, (await Actor.getInput() ?? {}));
 const proxyConfiguration = await Actor.createProxyConfiguration({useApifyProxy: input.useApifyProxy });
+validateInputs(input);
 router.addDefaultHandler(async (context) => {
-    // await scrollPageToBottom(data.page, {size: 1000, delay: 1000})
     let parseResult = await parse(context);
 
+    // further processing by OpenAI
+    if((input.openAIAPIKey ?? "") != "") {
+        try {
+            parseResult = await processByOpenAI(input, parseResult);
+        } catch(error) {} // if failed, do nothing
+    }
+
     let callbackUrl = input.callbackUrl;
-    if(callbackUrl!= "") await doCallback(callbackUrl, parseResult);
-    await context.pushData(parseResult);
+    await Promise.allSettled([
+        (callbackUrl != "") ? doCallback(callbackUrl, parseResult) : new Promise(() => {}),
+        context.pushData(parseResult)
+    ])
 });
 
 const defaultCrawlerTag = fallbackParser.getCrawlerTag("");
@@ -55,7 +68,7 @@ function makeCrawler(crawlerTag) {
                 requestHandler: router,
                 headless: false,
                 ignoreIframes: true,
-                requestHandlerTimeoutSecs: 40,
+                requestHandlerTimeoutSecs: 120,
                 sameDomainDelaySecs: 5,
                 maxConcurrency: 1,
             });
@@ -64,7 +77,7 @@ function makeCrawler(crawlerTag) {
                 proxyConfiguration,
                 requestHandler: router,
                 headless: true,
-                requestHandlerTimeoutSecs: 40,
+                requestHandlerTimeoutSecs: 120,
                 sameDomainDelaySecs: 5,
             });
         case "playwright.browser":
@@ -73,7 +86,7 @@ function makeCrawler(crawlerTag) {
                 requestHandler: router,
                 headless: false,
                 ignoreIframes: true,
-                requestHandlerTimeoutSecs: 40,
+                requestHandlerTimeoutSecs: 120,
                 sameDomainDelaySecs: 5,
                 maxConcurrency: 1,
             })
@@ -82,7 +95,7 @@ function makeCrawler(crawlerTag) {
                 proxyConfiguration,
                 requestHandler: router,
                 headless: true,
-                requestHandlerTimeoutSecs: 40,
+                requestHandlerTimeoutSecs: 120,
                 sameDomainDelaySecs: 5,
             });
         case "cheerio":
@@ -92,6 +105,7 @@ function makeCrawler(crawlerTag) {
                 proxyConfiguration,
                 requestHandler: router,
                 sameDomainDelaySecs: 2,
+                requestHandlerTimeoutSecs: 120,
             });
         default:
             throw new Error(`Unsupported crawler tag: ${crawlerTag}`);
@@ -106,6 +120,39 @@ async function doCallback(url, data) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
     })
+}
+
+async function processByOpenAI(input, parseResult) {
+    let openAIAPIKey = input.openAIAPIKey ?? "";
+    if(openAIAPIKey == "") return parseResult; // just return since no OpenAI API key provided
+    setDefaultClient(openAIAPIKey);
+
+    console.log("Using OpenAI to parse");
+    // if needed, get OpenAI to parse
+    if(
+        ["noSupportedParser", "parseFailed"].includes(parseResult.errorCode) &&
+        input.openAIParse == true
+    ) {
+        let chat = await Chat.create();
+        let {isValidArticle, title, body, images} = await parseNewsArticleHTMLByOpenAI(parseResult.html, chat);
+        if(isValidArticle) {
+            parseResult = {
+                success: true,
+                type: "article",
+                pageTitle: parseResult.pageTitle,
+                url: parseResult.url,
+                articleTitle: title,
+                paragraphs: [body],
+                images: images.length > 0? images : parseResult.images,
+                html: parseResult.html,
+            }
+        }
+    }
+
+    return parseResult;
+}
+
+function validateInputs(input) {
 }
 
 // 'https://www.reuters.com/technology/us-propose-how-google-should-boost-online-search-competition-2024-10-08/',
